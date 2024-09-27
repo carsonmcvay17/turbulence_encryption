@@ -53,7 +53,7 @@ class FourierTransform:
                 amp_array[i,j] = amplitude
         # find the threshold values
         lower = np.percentile(amp_array,self.alpha)
-        upper = np.percentile(amp_array,)
+        upper = np.percentile(amp_array,100-self.alpha)
         # look at rows and cols
         for i in range(amp_array.shape[0]):
             for j in range(amp_array.shape[1]):
@@ -61,6 +61,32 @@ class FourierTransform:
                 # if the amplitude isn't in the middle, delete from fourier space
                     ft_img[i,j] = 0
         return ft_img
+    
+    
+    def amp_filter_circle(self,input):
+        ft_img = input
+        # create an empty array of the amplitudes
+        # array size is the same as ft_img
+        amp_array = np.zeros([ft_img.shape[0], ft_img.shape[1]])
+        # look at rows and cols
+        for i in range(ft_img.shape[0]):
+            for j in range(ft_img.shape[1]):
+                i_comp = ft_img[i,j].real
+                j_comp = ft_img[i,j].imag
+                circle = i_comp**2 + j_comp**2
+                amp_array[i,j] = circle
+            
+        #find the threshold values
+        lower = np.percentile(amp_array,self.alpha)
+        upper = np.percentile(amp_array,100-self.alpha)
+        #   look at rows and cols
+        for i in range(amp_array.shape[0]):
+            for j in range(amp_array.shape[1]):
+                if amp_array[i,j] < lower or amp_array[i,j] > upper:
+                # if the amplitude isn't in the middle, delete from fourier space
+                    ft_img[i,j] = 0
+        return ft_img
+
     
     def inv_fft(self, result):
         """
