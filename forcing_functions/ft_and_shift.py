@@ -1,13 +1,14 @@
 import matplotlib.image as mpi
 import matplotlib.pyplot as plt
 import numpy as np
+import os 
 
 class FourierTransform:
     """
     A class for fourier transforming images and band pass filtering 
     the spectra in order to get forcing functions
     """
-    def _init_(self, alpha=.2):
+    def _init_(self, alpha=20):
         self.alpha = alpha
 
     def calculate_2dft(self, input):
@@ -63,7 +64,12 @@ class FourierTransform:
         return ft_img
     
     
-    def amp_filter_circle(self,input):
+    def amp_filter_circle(self, input):
+        """
+        Takes in a FT image and band pass filters the spectra
+        Returns the filtered image
+
+        """
         ft_img = input
         # create an empty array of the amplitudes
         # array size is the same as ft_img
@@ -97,6 +103,39 @@ class FourierTransform:
         ft_img = result
         img = np.fft.ifft2(ft_img)
         return img
+    
+    def loop_files(self):
+        """
+        Loops over all the files in the test images folder
+        and turns them black and white and performs the ft and 
+        filtering
+        Returns the inverse transformed filtered image
+        """
+        path = '/Users/carsonmcvay/desktop/gradschool/research/turbulence_encryption/Test_Images'
+        files = os.listdir(path)
+
+        for filename in files[0:3]:
+            img = os.path.join(path,filename)
+            img = mpi.imread(img)
+            img = np.dot(img[...,:3], [0.2989, 0.5870, 0.1140])
+            # img = img[:,:,:3].mean(axis=2)
+            input = self.calculate_2dft(img)
+            amp_array = self.amp_filter(input)
+            # result = filter(input)
+            img2 = self.inv_fft(amp_array)
+            plt.subplot(121)
+            plt.imshow(np.log(abs(img2)),cmap='gray')
+            plt.subplot(122)
+            plt.imshow(img,cmap='gray')
+            plt.show()
+
+img = FourierTransform.calculate_2dft('/Users/carsonmcvay/desktop/gradschool/research/turbulence_encryption/Test_Images/imagetwo')
+filt_img = FourierTransform.amp_filter_circle(img)
+output = FourierTransform.inv_fft(filt_img)
+plt.imshow(np.log(abs(output)),cmap='gray')
+plt.imshow(img,cmap='gray')
+plt.show()
+
     
     
 

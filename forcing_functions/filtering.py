@@ -124,21 +124,40 @@ def loop_files():
 
 
 
-        
-    
+def plot():
+    img = mpi.imread('/Users/carsonmcvay/Desktop/GradSchool/Research/turbulence_encryption/test_images/imagetwo.jpg')
+    img = img[:,:,:3].mean(axis=2)
+    input = calculate_2dft(img)
+    amp_array = amp_filter(input)
+    result = filter(input)
+    img2 = inv_fft(amp_array)  
+    return img2  
 
+def totuple(a):
+    try:
+        return tuple(totuple(i) for i in a)
+    except TypeError:
+        return a    
+    
+def prep_plot():
+    img = plot()
+    tup = totuple(img)
+    abs_tuple = tuple(np.abs(x) for x in tup)
+    plt.imshow(np.log(abs_tuple), cmap='gray')
+    plt.show()
 
 
 # img = mpi.imread('/Users/carsonmcvay/Desktop/GradSchool/Research/turbulence_encryption/test_images/imagetwo.jpg')
 # img = img[:,:,:3].mean(axis=2)
 # input = calculate_2dft(img)
-# amp_array = amp_filter(input)
+# amp_array = amp_filter_circle(input)
 # result = filter(input)
 # img2 = inv_fft(amp_array)
 # plt.subplot(121)
-# plt.imshow(np.log(abs(img2)))
+# plt.imshow(np.log(abs(img2)), cmap='gray')
 # plt.subplot(122)
-# plt.imshow(img)
+# plt.imshow(img, cmap='gray')
+# plt.show()
 
 # # plt.imshow(img)
 # plt.show()
