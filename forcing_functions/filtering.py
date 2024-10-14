@@ -157,7 +157,7 @@ def loop_files():
 
 
 def plot():
-    img = mpi.imread('/Users/carsonmcvay/Desktop/GradSchool/Research/turbulence_encryption/test_images/mixed_frequency.png')
+    img = mpi.imread('/Users/carsonmcvay/Desktop/GradSchool/Research/turbulence_encryption/test_images/dsc_2.jpg')
     img = img[:,:,:3].mean(axis=2)
     input = calculate_2dft(img)
     amp_array = amp_filter(input)
@@ -174,9 +174,13 @@ def totuple(a):
     
 def prep_plot():
     img = plot()
+    real_img = mpi.imread('/Users/carsonmcvay/Desktop/GradSchool/Research/turbulence_encryption/test_images/dsc_2.jpg')
     tup = totuple(img)
     abs_tuple = tuple(np.abs(x) for x in tup)
+    plt.subplot(121)
     plt.imshow(np.log(abs_tuple), cmap='gray')
+    plt.subplot(122)
+    plt.imshow(real_img, cmap='gray')  
     plt.show()
 
 
