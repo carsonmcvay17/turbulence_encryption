@@ -2,13 +2,12 @@ import matplotlib.image as mpi
 import matplotlib.pyplot as plt
 import numpy as np
 import os
+import math
 
 def calculate_2dft(input):
-    # ft = np.fft.ifftshift(input)
     ft = np.fft.fft2(input)
-    #print(ft[0,1])
-    # return ft
-    return np.fft.fftshift(ft)
+    return ft
+    # return np.fft.fftshift(ft)
 
 
 
@@ -25,9 +24,10 @@ def filter(input):
     # remove high frequency info
     keep_frac = 0.2
     ft_img2 = ft_img.copy()
+    ft_img3 = ft_img.copy()
     [row,col] = ft_img2.shape
 
-    # cut out high frequency
+    # cut out frequencies
     # rows
     ft_img2[int(row*keep_frac):int(row*(1-keep_frac)),:] = 0
     # cols
@@ -36,6 +36,38 @@ def filter(input):
     # Get the new matrix by subtracting the cut out 
     ft_img = ft_img-ft_img2
     return ft_img
+
+def circle_filter(input):
+    """
+    Takes in a FT image and filters out high and low spectra in a circle
+    Returns the filtered image
+    """
+    ft_img = input
+    # remove high frequency info
+    keep_frac = 0.2
+    ft_img2 = ft_img.copy()
+    [row,col] = ft_img2.shape
+
+    # now we gotta make circles :(
+
+    # find the midpoint
+    mid = [row // 2, col //2]
+    # find radius
+    area = row*col
+    r = round(np.sqrt(area // math.pi))
+
+    # delete everything within the radius
+    for i in range(row):
+        for j in range(col):
+            if (i-mid[0])**2 + (j-mid[1])**2 <= r**2:
+                ft_img2[i,j] = 0
+
+
+    # Get the new matrix by subtracting the cut out 
+    ft_img = ft_img-ft_img2
+    return ft_img
+
+
 
 def inv_fft(result):
     """
@@ -125,12 +157,13 @@ def loop_files():
 
 
 def plot():
-    img = mpi.imread('/Users/carsonmcvay/Desktop/GradSchool/Research/turbulence_encryption/test_images/imagetwo.jpg')
+    img = mpi.imread('/Users/carsonmcvay/Desktop/GradSchool/Research/turbulence_encryption/test_images/mixed_frequency.png')
     img = img[:,:,:3].mean(axis=2)
     input = calculate_2dft(img)
     amp_array = amp_filter(input)
-    result = filter(input)
-    img2 = inv_fft(amp_array)  
+    result = circle_filter(input)
+    # img2 = inv_fft(amp_array)  
+    img2 = inv_fft(result) 
     return img2  
 
 def totuple(a):
