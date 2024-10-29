@@ -162,8 +162,8 @@ def plot():
     input = calculate_2dft(img)
     amp_array = amp_filter(input)
     result = circle_filter(input)
-    # img2 = inv_fft(amp_array)  
-    img2 = inv_fft(result) 
+    img2 = inv_fft(amp_array)  
+    # img2 = inv_fft(result) 
     return img2  
 
 def totuple(a):
