@@ -1,3 +1,0 @@
-[submodule "jax-cfd"]
-	path = jax-cfd
-	url = https://github.com/google/jax-cfd.git
