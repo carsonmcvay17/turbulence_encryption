@@ -126,7 +126,7 @@ class Forcings(FourierTransform):
         # idk what we need here yet
         self.alpha = alpha
 
-    def kolmogorov_focing(
+    def kolmogorov_forcing(
             grid: grids.Grid, 
             scale: float = 1, 
             k: int = 2, 
