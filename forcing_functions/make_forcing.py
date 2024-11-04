@@ -14,17 +14,19 @@ from jax_cfd.base import filter_utils
 from jax_cfd.base import grids
 from jax_cfd.base import validation_problems
 
+import matplotlib.image as mpi
+import matplotlib.pyplot as plt
+import numpy as np
+import os 
+import math
+
 Array = grids.Array
 GridArrayVector = grids.GridArrayVector
 GridVariableVector = grids.GridVariableVector
 ForcingFn = Callable[[GridVariableVector], GridArrayVector]
 
 
-import matplotlib.image as mpi
-import matplotlib.pyplot as plt
-import numpy as np
-import os 
-import math
+
 
 class FourierTransform:
     """
@@ -125,7 +127,9 @@ class Forcings(FourierTransform):
     def __init__(self, alpha=0):
         # idk what we need here yet
         self.alpha = alpha
+    
 
+    
     def kolmogorov_forcing(
             grid: grids.Grid, 
             scale: float = 1, 
@@ -141,7 +145,7 @@ class Forcings(FourierTransform):
 
 
         if offsets is None:
-            offsets = grid.cell_faces
+            offsets = grid.cell_faces #says that 'Forcings has no attribute cell_faces
 
         if swap_xy:
             x = grid.mesh(offsets[1])[0]
@@ -178,7 +182,9 @@ class Forcings(FourierTransform):
             return f 
         return forcing
               
-                
+model = Forcings()
+kforcing = model.kolmogorov_forcing()
+       
 
 
  
