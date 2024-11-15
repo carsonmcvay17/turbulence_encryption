@@ -1,3 +1,4 @@
+from __future__ import annotations
 import jax_cfd
 import matplotlib.image as mpi
 import matplotlib.pyplot as plt
@@ -8,17 +9,17 @@ import math
 import functools
 from typing import Callable, Optional, Tuple
 
+
 import jax.numpy as jnp
 from jax_cfd.base import equations
 from jax_cfd.base import filter_utils
 from jax_cfd.base import grids
 from jax_cfd.base import validation_problems
+from jax_cfd.base.grids import Grid
+from typing import Any, Callable, Optional, Sequence, Tuple, Union
 
-import matplotlib.image as mpi
-import matplotlib.pyplot as plt
-import numpy as np
-import os 
-import math
+
+
 
 Array = grids.Array
 GridArrayVector = grids.GridArrayVector
@@ -120,7 +121,7 @@ class FourierTransform:
 
 
 
-class Forcings(FourierTransform):
+class Forcings(FourierTransform,Grid):
     """
     A class for creating a forcing function and applying it in a grid
     """
@@ -130,7 +131,7 @@ class Forcings(FourierTransform):
     
 
     
-    def kolmogorov_forcing(
+    def mod_kolmogorov_forcing(
             grid: grids.Grid, 
             scale: float = 1, 
             k: int = 2, 
@@ -139,13 +140,13 @@ class Forcings(FourierTransform):
     )   -> ForcingFn:
         """Returns the Kolmogorov focing function for turbulence in 2D"""
 
-        # probably not the cleanest way to do this
+        # # probably not the cleanest way to do this
         model = FourierTransform()
         forfun = model.prep_function()
 
 
         if offsets is None:
-            offsets = grid.cell_faces #says that 'Forcings has no attribute cell_faces
+            offsets = grid.cell_faces 
 
         if swap_xy:
             x = grid.mesh(offsets[1])[0]
@@ -182,12 +183,10 @@ class Forcings(FourierTransform):
             return f 
         return forcing
               
-model = Forcings()
-kforcing = model.kolmogorov_forcing()
+
        
 
 
  
     
         
-
