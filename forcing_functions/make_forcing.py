@@ -17,6 +17,7 @@ from jax_cfd.base import grids
 from jax_cfd.base import validation_problems
 from jax_cfd.base.grids import Grid
 from typing import Any, Callable, Optional, Sequence, Tuple, Union
+from skimage.transform import resize
 
 
 
@@ -70,6 +71,7 @@ class FourierTransform:
         # Get the new matrix by subtracting the cut out 
         ft_img = ft_img-ft_img2
         img = np.fft.ifft2(ft_img)
+        img = np.array([np.abs(x) for x in img]) # trying to fix the complex number issue and the list issue :(
         return img
     
     def amp_filter(self, input):
@@ -90,8 +92,8 @@ class FourierTransform:
                 amplitude = np.arctan(abs(imaginary/real))
                 amp_array[i,j] = amplitude
         #find the threshold values
-        lower = np.percentile(amp_array, self.alpha*100)
-        upper = np.percentile(amp_array,100-(self.alpha*100))
+        lower = np.percentile(amp_array, .2*100)
+        upper = np.percentile(amp_array,100-(.2*100))
         # look at rows and cols
         for i in range(amp_array.shape[0]):
             for j in range(amp_array.shape[1]):
@@ -101,13 +103,15 @@ class FourierTransform:
         
         # inverse transform
         img = np.fft.ifft2(ft_img)
+        img = np.array([np.abs(x) for x in img]) # trying to fix the complex number issue and also the list issue
         return img
     
     def prep_function(self):
         img = mpi.imread('/Users/carsonmcvay/Desktop/GradSchool/Research/turbulence_encryption/test_images/dsc_2.jpg')
         img = img[:,:,:3].mean(axis=2)
-        img2 = self.circle_filter(img)
-        # img2 = self.amp_filter(img)
+        # img2 = self.circle_filter(img)
+        img2 = self.amp_filter(img)
+        
         
         return img2 
 
@@ -143,6 +147,7 @@ class Forcings(FourierTransform,Grid):
         # # probably not the cleanest way to do this
         model = FourierTransform()
         forfun = model.prep_function()
+        forfun = resize(forfun,grid.shape) # trying to fix the error where the image is bigger than the grid
 
 
         if offsets is None:

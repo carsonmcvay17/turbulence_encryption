@@ -86,15 +86,18 @@ class FourierTransform:
         
         return img2 
 
-    def trying_something(self):
-        test = 4
-        return test 
     
-img = FourierTransform()
-test = img.prep_function()
-print(test[0,3])
+    
+# img = FourierTransform()
+# test = img.prep_function()
+# print(test[0,3])
 # also throwing a fit about plotting complex numbers but whatever
 # plt.imshow(np.log(test), cmap='gray')
+# plt.show()
+img = mpi.imread('/Users/carsonmcvay/Desktop/GradSchool/Research/turbulence_encryption/test_images/dsc_2.jpg')
+img = img[:,:,:3].mean(axis=2)
+plt.imshow(img,cmap='gray')
+plt.show()   
 
     
 
