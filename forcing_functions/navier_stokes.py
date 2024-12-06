@@ -111,10 +111,10 @@ def ForcedNavierStokes2D2(viscosity, grid, smooth):
   wave_number = 1
   offsets = ((0, 0), (0, 0))
   # pylint: disable=g-long-lambda
-#   forcing_fn = lambda grid: forcings.kolmogorov_forcing(
-#       grid, k=wave_number, offsets=offsets)
-  forcing_fn = lambda grid: make_forcing.Forcings.mod_kolmogorov_forcing(
+  forcing_fn = lambda grid: forcings.kolmogorov_forcing(
       grid, k=wave_number, offsets=offsets)
+  # forcing_fn = lambda grid: make_forcing.Forcings.mod_kolmogorov_forcing(
+  #     grid, k=wave_number, offsets=offsets)
   # trying different forcing functions to see if it breaks
   # forcing_fn= lambda grid: forcings.taylor_green_forcing(grid, k=wave_number)
   # forcing_fn = lambda grid: forcings.no_forcing(grid)
