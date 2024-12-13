@@ -35,7 +35,7 @@ class FourierTransform:
     A class for fourier transforming images and band pass filtering 
     the spectra in order to get forcing functions
     """
-    def _init_(self, alpha=0.2):
+    def __init__(self, alpha=0.2):
         self.alpha = alpha
 
     def circle_filter(self, input):
@@ -106,13 +106,14 @@ class FourierTransform:
         img = np.array([np.abs(x) for x in img]) # trying to fix the complex number issue and also the list issue
         return img
     
-    def prep_function(self):
-        img = mpi.imread('/Users/carsonmcvay/Desktop/GradSchool/Research/turbulence_encryption/test_images/dsc_2.jpg')
+    def prep_function(self, img_path):
+        if not isinstance(img_path, str):
+            raise ValueError(f"Expected img_path to be a string, but got {type(img_path)}")
+        img = mpi.imread(img_path)
         img = img[:,:,:3].mean(axis=2)
+        img = resize(img, (256, 256))
         # img2 = self.circle_filter(img)
         img2 = self.amp_filter(img)
-        
-        
         return img2 
 
     
@@ -136,6 +137,8 @@ class Forcings(FourierTransform,Grid):
 
     
     def mod_kolmogorov_forcing(
+            self,
+            img_path,
             grid: grids.Grid, 
             scale: float = 1, 
             k: int = 2, 
@@ -143,15 +146,24 @@ class Forcings(FourierTransform,Grid):
             offsets: Optional[Tuple[Tuple[float, ...], ...]] = None, 
     )   -> ForcingFn:
         """Returns the Kolmogorov focing function for turbulence in 2D"""
+        print(f"Inside mod_kolmogorov_forcing - img_path: {img_path} (type: {type(img_path)})")  # Debugging line
 
-        # # probably not the cleanest way to do this
+        # # # probably not the cleanest way to do this
+        # model = FourierTransform()
+        # forfun = model.prep_function(img_path)
+        # forfun = resize(forfun, grid.shape) # trying to fix the error where the image is bigger than the grid
+    
         model = FourierTransform()
-        forfun = model.prep_function()
-        forfun = resize(forfun,grid.shape) # trying to fix the error where the image is bigger than the grid
+        forfun = model.prep_function(img_path)  # Use the img_path to generate the forcing function
+        forfun = resize(forfun, grid.shape)  # Resize image to match grid shape
+        
 
 
         if offsets is None:
             offsets = grid.cell_faces 
+
+        # Check if grid is being used properly and doesn't need .shape directly
+        print(f"grid (type: {type(grid)})")  # Debugging grid type
 
         if swap_xy:
             x = grid.mesh(offsets[1])[0]

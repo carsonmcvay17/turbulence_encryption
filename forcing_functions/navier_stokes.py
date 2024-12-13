@@ -92,7 +92,7 @@ class NavierStokes2D2(time_stepping.ImplicitExplicitODE):
 
 
 # pylint: disable=g-doc-args,g-doc-return-or-yield,invalid-name
-def ForcedNavierStokes2D2(viscosity, grid, smooth):
+def ForcedNavierStokes2D2(viscosity, grid, smooth, forcing_fn):
   """Sets up the flow that is used in Kochkov et al. [1].
 
   The authors of [1] based their work on Boffetta et al. [2].
@@ -113,14 +113,17 @@ def ForcedNavierStokes2D2(viscosity, grid, smooth):
   # pylint: disable=g-long-lambda
   # forcing_fn = lambda grid: forcings.kolmogorov_forcing(
   #     grid, k=wave_number, offsets=offsets)
-  forcing_fn = lambda grid: make_forcing.Forcings.mod_kolmogorov_forcing(
-      grid, k=wave_number, offsets=offsets)
+  # commenting out all forcing functions 
+  # forcing_fn = lambda grid: make_forcing.Forcings.mod_kolmogorov_forcing(
+  #     grid, k=wave_number, offsets=offsets)
   # trying different forcing functions to see if it breaks
   # forcing_fn= lambda grid: forcings.taylor_green_forcing(grid, k=wave_number)
   # forcing_fn = lambda grid: forcings.no_forcing(grid)
   return NavierStokes2D2(
-      viscosity,
-      grid,
-      drag=0.1,
-      smooth=smooth,
-      forcing_fn=forcing_fn)
+    viscosity,
+    grid,
+    drag = 0.1,
+    smooth = smooth,
+    forcing_fn=forcing_fn
+  )
+ 
