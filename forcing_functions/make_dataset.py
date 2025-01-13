@@ -14,7 +14,6 @@ import navier_stokes
 from navier_stokes import NavierStokes2D2
 from run_turbulence import Turbulence
 from make_forcing import Forcings
-from navier_stokes import NavierStokes2D2
 
 class Dataset():
     def visualize_simulation(self, state_at_15, forcing_x, forcing_y, img_idx):
@@ -57,9 +56,9 @@ class Dataset():
 
         for idx, imgs in enumerate(forcing_images):
             i = imgs["i"]
-            img = img = f"/Users/carsonmcvay/desktop/gradschool/research/turbulence_encryption/raw_images/image_{i}.jpg"
+            img = f"/Users/carsonmcvay/desktop/gradschool/research/turbulence_encryption/raw_images/image_{i}.jpg"
             grid = grids.Grid((256,256), domain=((0,2*jnp.pi), (0,2*jnp.pi)))
-            viscosity = 1e-3
+            viscosity = 1e-2
 
             # define forcing function
             wave_number = 1
@@ -98,7 +97,7 @@ class Dataset():
         outputs = jnp.stack(outputs)
 
         # Save the dataset
-        save_path = "multi_forcing_simulations_combined.npz"
+        save_path = "multi_forcing_simulations_combined_viscneg2.npz"
         jnp.savez(save_path, inputs=inputs, outputs=outputs, metadata=metadata)
         print(f"Dataset saved to {save_path}.")
 
