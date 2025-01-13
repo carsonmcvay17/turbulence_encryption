@@ -20,10 +20,10 @@ class Turbulence():
     Runs a simulation of turbulence with the modified Kolmogorov forcing
     """
     def run_turbulence(self, forcing_fn):
-        viscosity = 1e-3
+        viscosity = 1e-2
         max_velocity = 7
         grid = grids.Grid((256, 256), domain=((0, 2 * jnp.pi), (0, 2 * jnp.pi)))
-        dt = cfd.equations.stable_time_step(max_velocity, .5, viscosity, grid)
+        dt = cfd.equations.stable_time_step(max_velocity, .1, viscosity, grid)
         
         # Change to ForcedNavierStokes2D2 with proper forcing_fn
         step_fn = spectral.time_stepping.crank_nicolson_rk4(
@@ -52,7 +52,7 @@ class Turbulence():
             'y': spatial_coord,
         }
         
-        timestep_index = jnp.abs(coords['time']-12.5).argmin()
+        timestep_index = jnp.abs(coords['time']-0).argmin()
         simulation_at_t15 = trajectory[timestep_index]
 
         # Evaluate the pre-initialized forcing function with the grid variables
