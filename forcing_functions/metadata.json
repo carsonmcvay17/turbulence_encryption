@@ -1,1 +1,0 @@
-{"description": "Navier-Stokes forced turbulence simulation", "grid_size": [256, 256], "viscosity": 0.001, "smooth": true}
