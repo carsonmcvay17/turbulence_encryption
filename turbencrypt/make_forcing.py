@@ -1,20 +1,14 @@
 from __future__ import annotations
-import jax_cfd
 import matplotlib.image as mpi
-import matplotlib.pyplot as plt
 import numpy as np
-import os 
 import math
 
-import functools
+
 from typing import Callable, Optional, Tuple
 
 
 import jax.numpy as jnp
-from jax_cfd.base import equations
-from jax_cfd.base import filter_utils
 from jax_cfd.base import grids
-from jax_cfd.base import validation_problems
 from jax_cfd.base.grids import Grid
 from typing import Any, Callable, Optional, Sequence, Tuple, Union
 from skimage.transform import resize
@@ -34,9 +28,11 @@ class FourierTransform:
     """
     A class for fourier transforming images and band pass filtering 
     the spectra in order to get forcing functions
+
+    Parameters:
     """
-    def __init__(self, alpha=0.2):
-        self.alpha = alpha
+    def __init__(self, keep_frac=0.2):
+        self.keep_frac = keep_frac
 
     def circle_filter(self, input):
         """
@@ -47,9 +43,6 @@ class FourierTransform:
 
         ft_img = np.fft.fft2(input)
         # remove high frequency info
-        # for some reason it throws a fit when I have the keep_frac=self.alpha 
-        # this is the temporary solution I guess
-        keep_frac = .2
         ft_img2 = ft_img.copy()
         [row,col] = ft_img2.shape
 
@@ -92,8 +85,8 @@ class FourierTransform:
                 amplitude = np.arctan(abs(imaginary/real))
                 amp_array[i,j] = amplitude
         #find the threshold values
-        lower = np.percentile(amp_array, .2*100)
-        upper = np.percentile(amp_array,100-(.2*100))
+        lower = np.percentile(amp_array, self.keep_frac*100)
+        upper = np.percentile(amp_array,100-(self.keep_frac*100))
         # look at rows and cols
         for i in range(amp_array.shape[0]):
             for j in range(amp_array.shape[1]):
@@ -130,9 +123,7 @@ class Forcings(FourierTransform,Grid):
     """
     A class for creating a forcing function and applying it in a grid
     """
-    def __init__(self, alpha=0):
-        # idk what we need here yet
-        self.alpha = alpha
+       
     
 
     
@@ -147,10 +138,7 @@ class Forcings(FourierTransform,Grid):
     )   -> ForcingFn:
         """Returns the Kolmogorov focing function for turbulence in 2D"""
 
-        # # # probably not the cleanest way to do this
-        # model = FourierTransform()
-        # forfun = model.prep_function(img_path)
-        # forfun = resize(forfun, grid.shape) # trying to fix the error where the image is bigger than the grid
+    
     
         model = FourierTransform()
         forfun = model.prep_function(img_path)  # Use the img_path to generate the forcing function

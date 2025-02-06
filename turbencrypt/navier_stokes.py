@@ -5,7 +5,6 @@ import jax.numpy as jnp
 from jax_cfd.base import boundaries
 from jax_cfd.base import forcings
 from jax_cfd.base import grids
-from jax_cfd.spectral import forcings as spectral_forcings
 from jax_cfd.spectral import time_stepping
 from jax_cfd.spectral import types
 from jax_cfd.spectral import utils as spectral_utils

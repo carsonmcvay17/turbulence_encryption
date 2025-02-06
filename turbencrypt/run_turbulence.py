@@ -1,10 +1,6 @@
 # all the imports
 import jax
 import jax.numpy as jnp
-import matplotlib.pyplot as plt
-import seaborn as sns
-import xarray
-import json
 
 import jax_cfd.base as cfd
 import jax_cfd.base.grids as grids
@@ -19,6 +15,15 @@ from turbencrypt.make_forcing import Forcings
 class Turbulence:
     """
     Runs a simulation of turbulence with the modified Kolmogorov forcing
+    parameters:
+    viscosity-changes the viscosity of the simulation
+    max_velocity-changes the max_velocity of the simulation
+    final_time-changes the final time
+    max_courant_num-adjusts the time step, smaller makes the step bigger
+    outer steps-?
+    gridsize-grid size of simulations
+    peak_wavenum-?
+    random_seed-controls random seed
     """
     viscosity: float = 1e-2
     max_velocity: float = 7.0
