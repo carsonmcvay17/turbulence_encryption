@@ -5,13 +5,17 @@ def main():
     sim_config = {
         'viscosity': 1,
         'max_velocity': 2.0,
-        'final_time': 1,
-        'outer_steps': 3,
+        'final_time': 25,
+        'outer_steps': 10,
         'gridsize': 64,
         'max_courant_num': 1e-3
     }
     dataset = Dataset()
-    dataset.make_data(config=sim_config)
+    dataset.make_data(
+        image_dir="raw_images",
+        save_path="data",
+        config=sim_config
+    )
 
 if __name__ == '__main__':
     main()
