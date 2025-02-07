@@ -2,6 +2,7 @@ import jax.numpy as jnp
 import matplotlib.pyplot as plt
 from typing import Any
 
+import glob
 from tqdm import tqdm
 
 from turbencrypt.run_turbulence import Turbulence
@@ -36,7 +37,7 @@ class Dataset():
         plt.show()
 
 
-    def make_data(self, config: dict[str, Any], visualize_idx: int | None = None):
+    def make_data(self, image_dir: str, save_path: str, config: dict[str, Any], visualize_idx: int | None = None):
         """
         Generate dataset, optionally visualize one simulation
         I need to update how I'm loading img I want the path to be a variable 
@@ -47,16 +48,14 @@ class Dataset():
         
 
         # define forcing images
-        forcing_images = [{"i": i, "description": f"image{i}"} for i in range(1,22)]
+        image_paths = glob.glob(f"{image_dir}/*")
 
-        for idx, imgs in tqdm(enumerate(forcing_images), desc="Running sims...", total=len(forcing_images)):
-            i = imgs["i"]
-            img = f"/Users/carsonmcvay/desktop/gradschool/research/turbulence_encryption/raw_images/image_{i}.jpg"
+        for idx, img_path in tqdm(enumerate(image_paths), desc="Running sims...", total=len(image_paths)):
 
             # define forcing function
             wave_number = 1
             offsets = ((0, 0), (0, 0))
-            forcing_fun = lambda grid: Forcings().mod_kolmogorov_forcing(img, grid, k=wave_number, offsets=offsets)
+            forcing_fun = lambda grid: Forcings().mod_kolmogorov_forcing(img_path, grid, k=wave_number, offsets=offsets)
 
             # run simulation
             model = Turbulence(**config)
@@ -81,14 +80,13 @@ class Dataset():
             # append
             inputs.append(state_normalized)
             outputs.append(forcing)
-            metadata.append({"description": imgs["description"], "i": i})
+            metadata.append({"description": "NONE", "i": idx})
 
         # stack inputs and outputs into single arrays
         inputs = jnp.stack(inputs)
         outputs = jnp.stack(outputs)
 
         # Save the dataset
-        save_path = "/Users/carsonmcvay/desktop/gradschool/research/turbulence_encryption/data/test_sim_visc1.npz"
         jnp.savez(save_path, inputs=inputs, outputs=outputs, metadata=metadata)
         print(f"Dataset saved to {save_path}.")
 
