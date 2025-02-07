@@ -11,10 +11,10 @@ class FourierTransform:
 
     I don't think that I'm actually using this code, so I'm not going to bother editing it. Might delete later
     """
-    def _init_(self, alpha=0.2):
-        self.alpha = alpha
+    def _init_(self, data_path, keep_frac=0.2):
+        self.keep_frac = keep_frac
 
-    def circle_filter(self, input):
+    def circle_filter(self, input, keep_frac):
         """
         Takes in an image, ft and filters out high and low spectra in a circle
         Inverse transforms the filtered image
@@ -25,7 +25,7 @@ class FourierTransform:
         # remove high frequency info
         # for some reason it throws a fit when I have the keep_frac=self.alpha 
         # this is the temporary solution I guess
-        keep_frac = .2
+        keep_frac = keep_frac
         ft_img2 = ft_img.copy()
         [row,col] = ft_img2.shape
 
@@ -67,8 +67,8 @@ class FourierTransform:
                 amplitude = np.arctan(abs(imaginary/real))
                 amp_array[i,j] = amplitude
         #find the threshold values
-        lower = np.percentile(amp_array, self.alpha*100)
-        upper = np.percentile(amp_array,100-(self.alpha*100))
+        lower = np.percentile(amp_array, self.keep_frac*100)
+        upper = np.percentile(amp_array,100-(self.keep_frac*100))
         # look at rows and cols
         for i in range(amp_array.shape[0]):
             for j in range(amp_array.shape[1]):
@@ -81,7 +81,7 @@ class FourierTransform:
         return img
     
     def prep_function(self):
-        img = mpi.imread('/Users/carsonmcvay/Desktop/GradSchool/Research/turbulence_encryption/test_images/dsc_2.jpg')
+        img = mpi.imread(self.data_path)
         img = img[:,:,:3].mean(axis=2)
         img2 = self.circle_filter(img)
         # img2 = self.amp_filter(img)
@@ -96,10 +96,10 @@ class FourierTransform:
 # also throwing a fit about plotting complex numbers but whatever
 # plt.imshow(np.log(test), cmap='gray')
 # plt.show()
-img = mpi.imread('/Users/carsonmcvay/Desktop/GradSchool/Research/turbulence_encryption/test_images/dsc_2.jpg')
-img = img[:,:,:3].mean(axis=2)
-plt.imshow(img,cmap='gray')
-plt.show()   
+# img = mpi.imread('/Users/carsonmcvay/Desktop/GradSchool/Research/turbulence_encryption/test_images/dsc_2.jpg')
+# img = img[:,:,:3].mean(axis=2)
+# plt.imshow(img,cmap='gray')
+# plt.show()   
 
     
 
