@@ -6,6 +6,7 @@ from neuralop.training import AdamW
 from neuralop.training.losses import LpLoss, H1Loss
 from turbencrypt.FNO import FourierNO
 
+
 # from Training import Trainer2
 
 data_path = "/Users/carsonmcvay/desktop/gradschool/research/turbulence_encryption/data/test_sim_visc1.npz"
