@@ -4,8 +4,9 @@ import jax.numpy as jnp
 import numpy as np
 from torch.utils.data import DataLoader
 from sklearn.model_selection import train_test_split
-from named_dataset import NamedTensorDataset
-from Training import Trainer2
+from turbencrypt.named_dataset import NamedTensorDataset
+# from named_dataset import NamedTensorDataset
+
 
 class FourierNO:
     """
@@ -29,7 +30,7 @@ class FourierNO:
 
         # training and test split
         # split
-        X_train, X_test, y_train, y_test = train_test_split(inputs, outputs, test_size, random_state)
+        X_train, X_test, y_train, y_test = train_test_split(inputs, outputs, test_size=test_size, random_state=random_state)
 
         # convert data from jnp to np
         # Convert data from JAX arrays to NumPy

@@ -4,11 +4,11 @@ from turbencrypt.make_dataset import Dataset
 def main():
     sim_config = {
         'viscosity': 1,
-        'max_velocity': 2.0,
+        'max_velocity': 7.0,
         'final_time': 25,
         'outer_steps': 10,
         'gridsize': 64,
-        'max_courant_num': 1e-3
+        'max_courant_num': 0.1
     }
     dataset = Dataset()
     dataset.make_data(

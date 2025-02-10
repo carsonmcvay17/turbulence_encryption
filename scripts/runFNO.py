@@ -3,13 +3,13 @@ import torch
 from neuralop.models import FNO
 from neuralop import Trainer
 from neuralop.training import AdamW
-from neuralop.training.losses import LpLoss, H1Loss
+from neuralop import LpLoss, H1Loss
 from turbencrypt.FNO import FourierNO
 
 
 # from Training import Trainer2
 
-data_path = "/Users/carsonmcvay/desktop/gradschool/research/turbulence_encryption/data/test_sim_visc1.npz"
+data_path = "/Users/gilpinlab/turbulence_encryption/data.npz"
 random_state = 42
 test_size = .2
 device = 'cpu'
