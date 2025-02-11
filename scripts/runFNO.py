@@ -5,17 +5,25 @@ from neuralop import Trainer
 from neuralop.training import AdamW
 from neuralop import LpLoss, H1Loss
 from turbencrypt.FNO import FourierNO
+from neuralop.data.datasets import load_darcy_flow_small
 
 
 # from Training import Trainer2
 
-data_path = "/Users/gilpinlab/turbulence_encryption/data.npz"
+# data_path = "/Users/gilpinlab/turbulence_encryption/data.npz"
 random_state = 42
 test_size = .2
 device = 'cpu'
-loaders = FourierNO.makeFNO(data_path, random_state, test_size)
-train_loader = loaders[0]
-test_loader = loaders[1]
+# loaders = FourierNO.makeFNO(data_path, random_state, test_size)
+# train_loader = loaders[0]
+# test_loader = loaders[1]
+# Let's load the small Darcy-flow dataset. 
+train_loader, test_loaders, data_processor = load_darcy_flow_small(
+        n_train=1000, batch_size=32, 
+        test_resolutions=[16, 32], n_tests=[100, 50],
+        test_batch_sizes=[32, 32],
+)
+data_processor = data_processor.to(device)
 
 model = FNO(n_modes=(16,16),
            in_channels=1,
