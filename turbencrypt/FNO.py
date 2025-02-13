@@ -115,7 +115,7 @@ class FourierNO:
 
         train_loader = DataLoader(train_dataset, batch_size=4, shuffle=True)
         test_loader = DataLoader(test_dataset, batch_size=4, shuffle=False)
-        return train_loader, test_loader, data_processor
+        return train_loader, test_loader#, data_processor
 
 
 
