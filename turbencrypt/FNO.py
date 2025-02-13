@@ -5,8 +5,55 @@ import numpy as np
 from torch.utils.data import DataLoader
 from sklearn.model_selection import train_test_split
 from turbencrypt.named_dataset import NamedTensorDataset
+from neuralop.data.transforms.normalizers import UnitGaussianNormalizer
+from neuralop.data.transforms.base_transforms import Transform
+from neuralop.data.transforms.data_processors import DefaultDataProcessor
 # from named_dataset import NamedTensorDataset
 
+
+class StupidTransform(Transform):
+    """
+    UnitGaussianNormalizer normalizes data to be zero mean and unit std.
+    """
+
+    def __init__(self, min=None, max=None, eps=1e-7, dim=None):
+        super().__init__()
+
+        self.register_buffer("min", min)
+        self.register_buffer("max", max)
+
+        self.eps = eps
+
+    def fit(self, data_batch):
+        self.update_min_max(data_batch)
+
+    def update_min_max(self, data_batch):
+        self.min = data_batch.min()
+        self.max = data_batch.max()
+
+    def transform(self, x):
+        return (x - self.min) / (self.max - self.min + self.eps)
+
+    def inverse_transform(self, x):
+        return x * (self.max - self.min + self.eps) + self.min
+
+    def forward(self, x):
+        return self.transform(x)
+
+    def cuda(self):
+        self.min = self.min.cuda()
+        self.max = self.max.cuda()
+        return self
+
+    def cpu(self):
+        self.min = self.min.cpu()
+        self.max = self.max.cpu()
+        return self
+
+    def to(self, device):
+        self.min = self.min.to(device)
+        self.max = self.max.to(device)
+        return self
 
 class FourierNO:
     """
@@ -25,8 +72,9 @@ class FourierNO:
         data = jnp.load(data)
         
         # define imputs and outputs
-        inputs = jnp.fft.irfft(data["inputs"], axis=-1)
+        inputs = data["inputs"]
         outputs = data["outputs"]
+
 
         # training and test split
         # split
@@ -43,10 +91,21 @@ class FourierNO:
         # data loaders
         # data loaders
         # Convert data to PyTorch tensors
-        X_train_tensor = torch.tensor(X_train_np, dtype=torch.float32)
-        y_train_tensor = torch.tensor(y_train_np, dtype=torch.float32)
-        X_test_tensor = torch.tensor(X_test_np, dtype=torch.float32)
-        y_test_tensor = torch.tensor(y_test_np, dtype=torch.float32)
+        X_train_tensor = torch.tensor(X_train_np, dtype=torch.float32).unsqueeze(1)
+        y_train_tensor = torch.tensor(y_train_np, dtype=torch.float32).permute(0, 3, 1, 2)
+        X_test_tensor = torch.tensor(X_test_np, dtype=torch.float32).unsqueeze(1)
+        y_test_tensor = torch.tensor(y_test_np, dtype=torch.float32).permute(0, 3, 1, 2)
+
+        encoder_in = StupidTransform()
+        encoder_in.fit(X_train_tensor)
+        encoder_out = UnitGaussianNormalizer()
+        encoder_out.fit(y_train_tensor)
+
+        # create DataProcessor
+        data_processor = DefaultDataProcessor(
+            in_normalizer=encoder_in,
+            out_normalizer=encoder_out,
+        )
 
         # Create data loaders
         # train_dataset = TensorDataset(X_train_tensor, y_train_tensor)
@@ -54,9 +113,9 @@ class FourierNO:
         train_dataset = NamedTensorDataset(X_train_tensor, y_train_tensor)
         test_dataset = NamedTensorDataset(X_test_tensor, y_test_tensor)
 
-        train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True)
-        test_loader = DataLoader(test_dataset, batch_size=32, shuffle=False)
-        return train_loader, test_loader
+        train_loader = DataLoader(train_dataset, batch_size=4, shuffle=True)
+        test_loader = DataLoader(test_dataset, batch_size=4, shuffle=False)
+        return train_loader, test_loader, data_processor
 
 
 
