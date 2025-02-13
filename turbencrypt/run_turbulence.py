@@ -66,9 +66,11 @@ class Turbulence:
             'x': spatial_coord,
             'y': spatial_coord,
         }
+
+        transformed_traj = jnp.fft.irfftn(trajectory, axes=(1,2))
         
         timestep_index = jnp.abs(coords['time']-0).argmin()
-        simulation_at_t15 = trajectory[timestep_index]
+        simulation_at_t = transformed_traj[timestep_index]
 
         # Evaluate the pre-initialized forcing function with the grid variables
         vx, vy = v0  # Assuming `v0` provides x and y velocity components
@@ -82,4 +84,4 @@ class Turbulence:
         forcing_array_x = forcing_x.data  # This is a JAX array
         forcing_array_y = forcing_y.data  # This is a JAX array
 
-        return simulation_at_t15, forcing_array_x, forcing_array_y
+        return simulation_at_t, forcing_array_x, forcing_array_y
