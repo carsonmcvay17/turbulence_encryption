@@ -1,5 +1,5 @@
 from turbencrypt.make_dataset import Dataset
-
+from turbencrypt.data_utils import dict2str
 
 def main():
     sim_config = {
@@ -10,12 +10,15 @@ def main():
         'gridsize': 64,
         'max_courant_num': 0.1
     }
+
+    save_path = f"data/forreal.npz"
     dataset = Dataset()
     dataset.make_data(
         image_dir="raw_images",
-        save_path="data",
+        save_path=save_path,
         config=sim_config
     )
+    
 
 if __name__ == '__main__':
     main()
