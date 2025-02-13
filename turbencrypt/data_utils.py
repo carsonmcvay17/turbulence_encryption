@@ -2,7 +2,12 @@ import jax.numpy as jnp
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-
+def dict2str(dict_obj: dict) -> str:
+    """
+    Convert a dictionary to a string representation
+    """
+    config_str = '-'.join([f"{key}_{value}" for key, value in dict_obj.items()])
+    return config_str.replace('.', '_')
 
 def safe_standardize(array: jnp.ndarray, axis: int = 1, epsilon: float = 1e-8) -> jnp.ndarray:
     """

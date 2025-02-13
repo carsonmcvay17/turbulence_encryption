@@ -59,10 +59,10 @@ class Dataset():
 
             # run simulation
             model = Turbulence(**config)
-            state, forcing_x_array, forcing_y_array = model.run_turbulence(forcing_fun)
+            vorticity, forcing_x_array, forcing_y_array = model.run_turbulence(forcing_fun)
             
             # normalize
-            state_normalized = safe_standardize(state)
+            vorticity_normalized = safe_standardize(vorticity)
             forcing_x_normalized = safe_standardize(forcing_x_array)
             forcing_y_normalized = safe_standardize(forcing_y_array)
 
@@ -72,13 +72,13 @@ class Dataset():
              # Optionally visualize this simulation
             if visualize_idx is not None and idx == visualize_idx:
                 self.visualize_simulation(
-                    state_normalized, forcing_x_normalized, forcing_y_normalized, img_idx=idx
+                    vorticity_normalized, forcing_x_normalized, forcing_y_normalized, img_idx=idx
                 )
                 return  # Stop after visualizing
 
 
             # append
-            inputs.append(state_normalized)
+            inputs.append(vorticity_normalized)
             outputs.append(forcing)
             metadata.append({"description": "NONE", "i": idx})
 
@@ -86,7 +86,11 @@ class Dataset():
         inputs = jnp.stack(inputs)
         outputs = jnp.stack(outputs)
 
+        # note! half of the outputs entries are zero, which seems like it might be contributing to the NaN disaster
+       
+
         # Save the dataset
+
         jnp.savez(save_path, inputs=inputs, outputs=outputs, metadata=metadata)
         print(f"Dataset saved to {save_path}.")
 
