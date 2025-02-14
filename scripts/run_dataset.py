@@ -11,7 +11,7 @@ def main():
         'max_courant_num': 0.1
     }
 
-    save_path = f"data/forreal.npz"
+    save_path = f"data/forreal2.npz"
     dataset = Dataset()
     dataset.make_data(
         image_dir="raw_images",
