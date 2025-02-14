@@ -31,6 +31,9 @@ train_loader, test_loaders, data_processor = load_darcy_flow_small(
         test_resolutions=[16, 32], n_tests=[100, 50],
         test_batch_sizes=[32, 32],
 )
+# idk if I can actually just take the data_processor from load_darcy_flow but it seems like it's working?
+# It says that it's training on 16 samples of the size of my inputs
+# I want to double check testing
 train_loader2, test_loaders = FourierNO.makeFNO(data_path, random_state, test_size)
 
 
@@ -76,7 +79,7 @@ print(f'\n * Test: {eval_losses}')
 sys.stdout.flush()
 
 
-trainer = Trainer(model=model, n_epochs=20,
+trainer = Trainer(model=model, n_epochs=30,
                   device=device,
                   data_processor=data_processor,
                   wandb_log=False,
@@ -85,7 +88,7 @@ trainer = Trainer(model=model, n_epochs=20,
                   verbose=True)
 
 trainer.train(train_loader=train_loader2,
-              test_loaders={},
+              test_loaders={}, # look at this
               optimizer=optimizer,
               scheduler=scheduler, 
               regularizer=False, 
