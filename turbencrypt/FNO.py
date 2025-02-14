@@ -2,7 +2,7 @@
 import torch
 import jax.numpy as jnp
 import numpy as np
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, TensorDataset
 from sklearn.model_selection import train_test_split
 from turbencrypt.named_dataset import NamedTensorDataset
 from neuralop.data.transforms.normalizers import UnitGaussianNormalizer
@@ -71,14 +71,17 @@ class FourierNO:
         """
         data = jnp.load(data)
         
-        # define imputs and outputs
+        # define inputs and outputs
         inputs = data["inputs"]
         outputs = data["outputs"]
+        
+        
 
 
         # training and test split
         # split
         X_train, X_test, y_train, y_test = train_test_split(inputs, outputs, test_size=test_size, random_state=random_state)
+        
 
         # convert data from jnp to np
         # Convert data from JAX arrays to NumPy
@@ -87,14 +90,17 @@ class FourierNO:
         y_train_np = np.array(jnp.asarray(y_train).block_until_ready())
         X_test_np = np.array(jnp.asarray(X_test).block_until_ready())
         y_test_np = np.array(jnp.asarray(y_test).block_until_ready())
+        
 
         # data loaders
         # data loaders
         # Convert data to PyTorch tensors
         X_train_tensor = torch.tensor(X_train_np, dtype=torch.float32).unsqueeze(1)
-        y_train_tensor = torch.tensor(y_train_np, dtype=torch.float32).permute(0, 3, 1, 2)
+        y_train_tensor = torch.tensor(y_train_np, dtype=torch.float32).unsqueeze(1)#.permute(0, 3, 1, 2)
         X_test_tensor = torch.tensor(X_test_np, dtype=torch.float32).unsqueeze(1)
-        y_test_tensor = torch.tensor(y_test_np, dtype=torch.float32).permute(0, 3, 1, 2)
+        y_test_tensor = torch.tensor(y_test_np, dtype=torch.float32).unsqueeze(1)#.permute(0, 3, 1, 2)
+        
+        
 
         encoder_in = StupidTransform()
         encoder_in.fit(X_train_tensor)
@@ -115,7 +121,7 @@ class FourierNO:
 
         train_loader = DataLoader(train_dataset, batch_size=4, shuffle=True)
         test_loader = DataLoader(test_dataset, batch_size=4, shuffle=False)
-        return train_loader, test_loader#, data_processor
+        return train_loader, test_loader, data_processor
 
 
 
