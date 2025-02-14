@@ -12,7 +12,7 @@ from neuralop.training.incremental import IncrementalFNOTrainer
 
 # from Training import Trainer2
 
-data_path = "/Users/gilpinlab/turbulence_encryption/data/forreal.npz"
+data_path = "/Users/gilpinlab/turbulence_encryption/data/forreal2.npz"
 random_state = 42
 test_size = 0.2
 device = 'cpu'
@@ -23,7 +23,7 @@ model = FNO(
     max_n_modes=(64,64),
     n_modes=(2,2),
            in_channels=1,
-           out_channels=2, 
+           out_channels=1, # looking at num of channels
            hidden_channels=32,
            )
 
@@ -53,7 +53,7 @@ scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=30)
 l2loss = LpLoss(d=2, p=2)
 h1loss = H1Loss(d=2)
 
-train_loss = h1loss
+train_loss = l2loss
 eval_losses={'l2': l2loss, 'h1': h1loss}
 
 
