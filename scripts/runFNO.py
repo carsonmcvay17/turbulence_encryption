@@ -12,7 +12,7 @@ from neuralop.training.incremental import IncrementalFNOTrainer
 
 # from Training import Trainer2
 
-data_path = "/Users/gilpinlab/turbulence_encryption/data/forreal2.npz"
+data_path = "/Users/gilpinlab/turbulence_encryption/data/initconds_test.npz"
 random_state = 42
 test_size = 0.2
 device = 'cpu'

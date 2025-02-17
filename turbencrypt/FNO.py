@@ -96,9 +96,9 @@ class FourierNO:
         # data loaders
         # Convert data to PyTorch tensors
         X_train_tensor = torch.tensor(X_train_np, dtype=torch.float32).unsqueeze(1)
-        y_train_tensor = torch.tensor(y_train_np, dtype=torch.float32).unsqueeze(1)#.permute(0, 3, 1, 2)
+        y_train_tensor = torch.tensor(y_train_np, dtype=torch.float32).unsqueeze(1)   #.permute(0, 3, 1, 2)
         X_test_tensor = torch.tensor(X_test_np, dtype=torch.float32).unsqueeze(1)
-        y_test_tensor = torch.tensor(y_test_np, dtype=torch.float32).unsqueeze(1)#.permute(0, 3, 1, 2)
+        y_test_tensor = torch.tensor(y_test_np, dtype=torch.float32).unsqueeze(1)   #.permute(0, 3, 1, 2)
         
         
 
@@ -121,7 +121,7 @@ class FourierNO:
 
         train_loader = DataLoader(train_dataset, batch_size=4, shuffle=True)
         test_loader = DataLoader(test_dataset, batch_size=4, shuffle=False)
-        return train_loader, test_loader, data_processor
+        return train_loader, test_loader#, data_processor
 
 
 

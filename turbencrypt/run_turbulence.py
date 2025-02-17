@@ -10,6 +10,7 @@ from dataclasses import dataclass
 import turbencrypt.navier_stokes as navier_stokes
 from turbencrypt.navier_stokes import NavierStokes2D2
 from turbencrypt.make_forcing import Forcings
+from turbencrypt.initial_conditions import quiescient
 
 @dataclass
 class Turbulence:
@@ -54,7 +55,7 @@ class Turbulence:
             cfd.funcutils.repeated(step_fn, inner_steps), self.outer_steps
         )
 
-        v0 = cfd.initial_conditions.filtered_velocity_field(jax.random.PRNGKey(self.random_seed), grid, self.max_velocity, self.peak_wavenum)
+        v0 = quiescient(jax.random.PRNGKey(self.random_seed), grid, self.max_velocity, self.peak_wavenum)
         vorticity0 = cfd.finite_differences.curl_2d(v0).data
         vorticity_hat0 = jnp.fft.rfftn(vorticity0)
 
@@ -71,6 +72,7 @@ class Turbulence:
         
         timestep_index = jnp.abs(coords['time']-0).argmin()
         simulation_at_t = transformed_traj[timestep_index]
+       
 
         # Evaluate the pre-initialized forcing function with the grid variables
         vx, vy = v0  # Assuming `v0` provides x and y velocity components
