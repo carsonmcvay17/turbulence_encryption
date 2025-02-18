@@ -11,6 +11,8 @@ import turbencrypt.navier_stokes as navier_stokes
 from turbencrypt.navier_stokes import NavierStokes2D2
 from turbencrypt.make_forcing import Forcings
 from turbencrypt.initial_conditions import quiescient
+import matplotlib.pyplot as plt
+
 
 @dataclass
 class Turbulence:
@@ -39,7 +41,9 @@ class Turbulence:
     random_seed: int = 42
 
 
-    def run_turbulence(self, forcing_fn):
+    def run_turbulence(self, forcing_fn, movie=False):
+        """kwarg movie type bool if True saves a movie of the simulations
+        """
         grid = grids.Grid((self.gridsize, self.gridsize), domain=((0, 2 * jnp.pi), (0, 2 * jnp.pi)))
         dt = cfd.equations.stable_time_step(self.max_velocity, self.max_courant_num, self.viscosity, grid)
         
@@ -69,6 +73,15 @@ class Turbulence:
         }
 
         transformed_traj = jnp.fft.irfftn(trajectory, axes=(1,2))
+        breakpoint()
+        if movie:
+            frames = jnp.linspace(0,25,100).astype(int)
+            for i in frames:
+                plt.figure()
+                plt.imshow(transformed_traj[i])
+                filename = "my_fig"+ str(i).zfill(4)+".png"
+                plt.savefig(filename, dpi=300)
+                plt.close()
         
         timestep_index = jnp.abs(coords['time']-0).argmin()
         simulation_at_t = transformed_traj[timestep_index]
