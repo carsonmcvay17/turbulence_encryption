@@ -62,7 +62,7 @@ class FourierNO:
     """
 
 
-    def makeFNO(data, random_state, test_size):
+    def makeFNO(data, random_state, bs:int, test_split: float):
         """
         Makes the FNO
         arguments: data-string to the data path
@@ -75,12 +75,7 @@ class FourierNO:
         inputs = data["inputs"]
         outputs = data["outputs"]
         
-        
-
-
-        # training and test split
-        # split
-        X_train, X_test, y_train, y_test = train_test_split(inputs, outputs, test_size=test_size, random_state=random_state)
+        X_train, X_test, y_train, y_test = train_test_split(inputs, outputs, test_size=test_split, random_state=random_state)
         
 
         # convert data from jnp to np
@@ -100,16 +95,13 @@ class FourierNO:
         X_test_tensor = torch.tensor(X_test_np, dtype=torch.float32).unsqueeze(1)
         y_test_tensor = torch.tensor(y_test_np, dtype=torch.float32).unsqueeze(1)   #.permute(0, 3, 1, 2)
         
-        
 
-        encoder_in = StupidTransform()
-        encoder_in.fit(X_train_tensor)
         encoder_out = UnitGaussianNormalizer()
         encoder_out.fit(y_train_tensor)
 
         # create DataProcessor
         data_processor = DefaultDataProcessor(
-            in_normalizer=encoder_in,
+            in_normalizer=None,
             out_normalizer=encoder_out,
         )
 
@@ -119,9 +111,14 @@ class FourierNO:
         train_dataset = NamedTensorDataset(X_train_tensor, y_train_tensor)
         test_dataset = NamedTensorDataset(X_test_tensor, y_test_tensor)
 
-        train_loader = DataLoader(train_dataset, batch_size=4, shuffle=True)
-        test_loader = DataLoader(test_dataset, batch_size=4, shuffle=False)
-        return train_loader, test_loader#, data_processor
+        train_loader = DataLoader(train_dataset, batch_size=bs, shuffle=True)
+        test_loader = DataLoader(test_dataset, batch_size=bs, shuffle=False)
+        return train_loader, test_loader, data_processor
+
+
+
+    
+
 
 
 
