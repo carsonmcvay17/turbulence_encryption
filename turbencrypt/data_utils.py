@@ -9,7 +9,7 @@ def dict2str(dict_obj: dict) -> str:
     config_str = '-'.join([f"{key}_{value}" for key, value in dict_obj.items()])
     return config_str.replace('.', '_')
 
-def safe_standardize(array: jnp.ndarray, axis: int = 1, epsilon: float = 1e-8) -> jnp.ndarray:
+def safe_standardize(array: jnp.ndarray, axis: int = -1, epsilon: float = 1e-8) -> jnp.ndarray:
     """
     Standardize an array along an axis safely (ignoring NaNs)
 
