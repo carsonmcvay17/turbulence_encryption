@@ -99,10 +99,11 @@ class FourierTransform:
         img = np.array([np.abs(x) for x in img]) # trying to fix the complex number issue and also the list issue
         return img
     
-    def prep_function(self, img_path):
+    def load_image(self, img_path):
         if not isinstance(img_path, str):
             raise ValueError(f"Expected img_path to be a string, but got {type(img_path)}")
         img = mpi.imread(img_path)
+        #breakpoint()
         img = img[:,:,:3].mean(axis=2)
         img = resize(img, (256, 256))
         # img2 = self.circle_filter(img)
@@ -124,37 +125,28 @@ class Forcings(FourierTransform,Grid):
     A class for creating a forcing function and applying it in a grid
     """
        
-    
-
-    
     def mod_kolmogorov_forcing(
             self,
-            img_path,
+            forcing_img: np.ndarray,
             grid: grids.Grid, 
             scale: float = 1, 
-            k: int = 2, 
             swap_xy: bool = False, 
             offsets: Optional[Tuple[Tuple[float, ...], ...]] = None, 
     )   -> ForcingFn:
         """Returns the Kolmogorov focing function for turbulence in 2D"""
 
-    
-    
-        model = FourierTransform()
-        forfun = model.prep_function(img_path)  # Use the img_path to generate the forcing function
-        forfun = resize(forfun, grid.shape)  # Resize image to match grid shape
-        
-
 
         if offsets is None:
             offsets = grid.cell_faces 
+
+        forcing_img = resize(forcing_img, grid.shape)
 
         # Check if grid is being used properly and doesn't need .shape directly
 
         if swap_xy:
             x = grid.mesh(offsets[1])[0]
             # v = scale * grids.GridArray(jnp.sin(k*x), offsets[1], grid)
-            v = scale * grids.GridArray(forfun, offsets[1], grid)
+            v = scale * grids.GridArray(forcing_img, offsets[1], grid)
 
             if grid.ndim == 2:
                 u = grids.GridArray(jnp.zeros_like(v.data), (1, 1/2), grid)
@@ -168,7 +160,7 @@ class Forcings(FourierTransform,Grid):
         else:
             y = grid.mesh(offsets[0])[1]
             # u = scale * grids.GridArray(jnp.sin(k*y), offsets[0], grid)
-            u = scale * grids.GridArray(forfun, offsets[0], grid)
+            u = scale * grids.GridArray(forcing_img, offsets[0], grid)
 
             if grid.ndim == 2:
                 v = grids.GridArray(jnp.zeros_like(u.data), (1/2, 1), grid)
