@@ -6,7 +6,7 @@ import glob
 from tqdm import tqdm
 
 from turbencrypt.run_turbulence import Turbulence
-from turbencrypt.make_forcing import Forcings
+from turbencrypt.make_forcing import Forcings, FourierTransform
 from turbencrypt.data_utils import safe_standardize
 
 class Dataset():
@@ -37,70 +37,59 @@ class Dataset():
         plt.show()
 
 
-    def make_data(self, image_dir: str, save_path: str, config: dict[str, Any], visualize_idx: int | None = None):
+    def run_sim_from_images(self, image_dir: str, save_path: str, config: dict[str, Any]):
         """
         Generate dataset, optionally visualize one simulation
-        I need to update how I'm loading img I want the path to be a variable 
         """
+        fftmodel = FourierTransform()
+        image_paths = glob.glob(f"{image_dir}/*")
+        image_iter = (fftmodel.load_image(img_path) for img_path in image_paths)
+        return self.run_sim_from_tensors(image_iter, save_path, config, length=len(image_paths))
+
+
+    def run_sim_from_tensors(self, tensors: list[jnp.ndarray], save_path: str, config: dict[str, Any], length: int = None):
         inputs = [] # store simulations at t=15
         outputs = [] #store forcing functions
         metadata = []
         
+        length = length or len(tensors)
+        for idx, field in tqdm(enumerate(tensors), desc="Running sims...", total=length):
 
-        # define forcing images
-        image_paths = glob.glob(f"{image_dir}/*")
-
-        for idx, img_path in tqdm(enumerate(image_paths), desc="Running sims...", total=len(image_paths)):
-
-            # define forcing function
-            wave_number = 1
-            offsets = ((0, 0), (0, 0))
-            forcing_fun = lambda grid: Forcings().mod_kolmogorov_forcing(img_path, grid, k=wave_number, offsets=offsets)
-
-            # run simulation
-            model = Turbulence(**config)
-            vorticity, forcing_x_array, forcing_y_array = model.run_turbulence(forcing_fun)
-            
-            
-            # normalize
-            vorticity_normalized = safe_standardize(vorticity)
-            forcing_x_normalized = safe_standardize(forcing_x_array)
-            forcing_y_normalized = safe_standardize(forcing_y_array)
-            
-
-            # combine forcing
-            # forcing = jnp.stack((forcing_x_normalized, forcing_y_normalized), axis=-1)
-            forcing = forcing_x_normalized
-            
-            
-
-             # Optionally visualize this simulation
-            if visualize_idx is not None and idx == visualize_idx:
-                self.visualize_simulation(
-                    vorticity_normalized, forcing_x_normalized, forcing_y_normalized, img_idx=idx
-                )
-                return  # Stop after visualizing
-
-
-            # append
+            vorticity_normalized, forcing = self.run_single_sim(field, config)
+        
             inputs.append(vorticity_normalized)
             outputs.append(forcing)
             metadata.append({"description": "NONE", "i": idx})
+            
 
         # stack inputs and outputs into single arrays
         inputs = jnp.stack(inputs)
         outputs = jnp.stack(outputs)
 
-        
-
-        
-       
-
-        # Save the dataset
-
         jnp.savez(save_path, inputs=inputs, outputs=outputs, metadata=metadata)
         print(f"Dataset saved to {save_path}.")
 
+    def run_single_sim(self, img: jnp.ndarray, config):
+        # define forcing function
+        wave_number = 1
+        offsets = ((0, 0), (0, 0))
+        forcing_fun = lambda grid: Forcings().mod_kolmogorov_forcing(img, grid, offsets=offsets)
+
+        # run simulation
+        model = Turbulence(**config)
+        vorticity, forcing_x_array, forcing_y_array = model.run_turbulence(forcing_fun)
+        
+        # if forcing_x_array.ndim == 2:
+        #     forcing_x_array = forcing_x_array[..., None]
+        # if vorticity.ndim == 2:
+        #     vorticity = vorticity[..., None]
+
+        # # normalize
+        # vorticity_normalized = safe_standardize(vorticity).squeeze()
+        # forcing_x_normalized = safe_standardize(forcing_x_array).squeeze()
+        # breakpoint()
+
+        return vorticity, forcing_x_array
 
 
 
