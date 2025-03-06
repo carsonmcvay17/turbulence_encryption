@@ -1,5 +1,7 @@
 # imports
 import torch
+import numpy as np
+import matplotlib.pyplot as plt
 from neuralop.models import FNO
 from neuralop import Trainer
 from neuralop.training import AdamW
@@ -12,11 +14,13 @@ from neuralop.training.incremental import IncrementalFNOTrainer
 
 # from Training import Trainer2
 
-data_path = "/Users/gilpinlab/turbulence_encryption/data/initconds_test.npz"
+data_path = "/Users/gilpinlab/turbulence_encryption/data/mnist_dataset.npz"
 random_state = 42
 test_size = 0.2
 device = 'cpu'
-train_loader, test_loader, data_processor = FourierNO.makeFNO(data_path, random_state, test_size)
+train_loader, test_loader, data_processor = FourierNO.makeFNO(data_path, random_state, 16, test_size)
+
+
 
 
 model = FNO(
@@ -25,6 +29,7 @@ model = FNO(
            in_channels=1,
            out_channels=1, # looking at num of channels
            hidden_channels=32,
+
            )
 
 model = model.to(device)
@@ -42,11 +47,10 @@ data_transform = IncrementalDataProcessor(
 )
 
 data_transform = data_transform.to(device)
-
-
+num_iters = 10
 optimizer = AdamW(model.parameters(),
-                 lr=8e-3, weight_decay=1e-3) 
-scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=30)
+                 lr=8e-3, weight_decay=1e-4) 
+scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=num_iters)
 # scheduler = torch.optim.lr_scheduler.LambdaLR(optimizer, lr_lambda=lambda epoch: 0.0)
 
 # create losses
@@ -68,7 +72,7 @@ eval_losses={'l2': l2loss, 'h1': h1loss}
 #                  verbose=True)
 trainer = IncrementalFNOTrainer(
     model=model,
-    n_epochs=18,
+    n_epochs=num_iters,
     data_processor=data_transform,
     device=device,
     verbose=True,
@@ -77,7 +81,7 @@ trainer = IncrementalFNOTrainer(
     incremental_grad_eps=0.9999,
     incremental_loss_eps = 0.001,
     incremental_buffer=5,
-    incremental_max_iter=18,
+    incremental_max_iter=num_iters,
     incremental_grad_max_iter=2,
 )
 
@@ -89,3 +93,38 @@ trainer.train(train_loader=train_loader,
              regularizer=False,
              training_loss=train_loss,
              eval_losses=eval_losses)
+
+
+# evaluation
+num_samples = 4
+model.eval()
+with torch.no_grad():
+    for batch in test_loader:
+        
+        processed_batch = data_processor.preprocess(batch)
+        input_data = processed_batch['x']
+        target_data = processed_batch['y']
+
+        input_data, target_data = input_data.to(device), target_data.to(device)
+
+
+        # make predictions
+        output = model(input_data)
+
+        h1losses = h1loss(output, target_data).item()
+        lplosses = l2loss(output, target_data).item()
+        # visualize
+        fig, axes = plt.subplots(num_samples, 3, figsize=(12, 10))
+
+        for axes_row, idx in zip(axes, np.random.choice(len(input_data), num_samples, replace=False)):
+            for ax, data, label in zip(axes_row, [input_data[idx], target_data[idx], output[idx]], ['Input', 'Target', 'Prediction']):
+                im = ax.imshow(data[0].cpu().numpy(), cmap='seismic')
+                ax.set_title(label)
+                ax.axis('off')
+                fig.colorbar(im, shrink=0.5)
+
+        fig.suptitle(f"batch losses (h1) : {h1losses:.4f} (l2) : {lplosses:.4f}")
+        plt.tight_layout()
+        plt.show()  
+
+        
