@@ -22,7 +22,7 @@ class Turbulence:
     viscosity-changes the viscosity of the simulation
     max_velocity-changes the max_velocity of the simulation
     final_time-changes the final time
-    max_courant_num-adjusts the time step, smaller makes the step bigger
+    max_courant_num-rate at which information propogates between cells
     outer steps-?
     gridsize-grid size of simulations
     peak_wavenum-?
@@ -73,7 +73,6 @@ class Turbulence:
         }
 
         transformed_traj = jnp.fft.irfftn(trajectory, axes=(1,2))
-        breakpoint()
         if movie:
             frames = jnp.linspace(0,25,100).astype(int)
             for i in frames:
