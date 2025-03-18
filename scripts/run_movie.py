@@ -2,20 +2,20 @@ from turbencrypt.make_movie import movie
 
 def main():
     sim_config = {
-        'viscosity': 1e-1,
+        'viscosity': 1e-2,
         'max_velocity': 7.0,
-        'final_time': 25,
-        'outer_steps': 10,
-        'gridsize': 64,
-        'max_courant_num': 0.1
+        'final_time': 30,
+        'outer_steps': 50,
+        'gridsize': 128,
+        'max_courant_num': 0.001
     }
 
-    save_path = f"data"
+    save_path = f"movie_files/kolmogorov"
     model = movie()
     model.make_movie(
         image_dir="raw_images/image_3.jpg",
         save_path=save_path,
-        config=sim_config
+        sim_config=sim_config, 
     )
     
 
