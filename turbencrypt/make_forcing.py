@@ -2,6 +2,7 @@ from __future__ import annotations
 import matplotlib.image as mpi
 import numpy as np
 import math
+import matplotlib.pyplot as plt
 
 
 from typing import Callable, Optional, Tuple
@@ -12,6 +13,8 @@ from jax_cfd.base import grids
 from jax_cfd.base.grids import Grid
 from typing import Any, Callable, Optional, Sequence, Tuple, Union
 from skimage.transform import resize
+from turbencrypt.data_utils import safe_standardize
+from PIL import Image
 
 
 
@@ -102,13 +105,14 @@ class FourierTransform:
     def load_image(self, img_path):
         if not isinstance(img_path, str):
             raise ValueError(f"Expected img_path to be a string, but got {type(img_path)}")
-        img = mpi.imread(img_path)
-        #breakpoint()
-        img = img[:,:,:3].mean(axis=2)
-        img = resize(img, (256, 256))
+        img = Image.open(img_path).convert('L')
+        img_array = np.array(img)/255.
+        img = resize(img_array, (256, 256))
+        img = img*2-1
         # img2 = self.circle_filter(img)
-        img2 = self.amp_filter(img)
-        return img2 
+        # img2 = self.amp_filter(img)
+        # return img2 
+        return img
 
     
     
@@ -138,9 +142,9 @@ class Forcings(FourierTransform,Grid):
 
         if offsets is None:
             offsets = grid.cell_faces 
+        
 
         forcing_img = resize(forcing_img, grid.shape)
-
         # Check if grid is being used properly and doesn't need .shape directly
 
         if swap_xy:
