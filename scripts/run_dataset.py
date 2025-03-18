@@ -36,7 +36,7 @@ def main():
         'max_courant_num': 0.1
     }
 
-    save_path = f"data/mnist_dataset2.npz"
+    save_path = f"data/mnist_re700_g64.npz"
     dataset = Dataset()
     # dataset.run_sim_from_images(
     #     image_dir="raw_images",
