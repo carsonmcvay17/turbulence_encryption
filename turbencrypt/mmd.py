@@ -21,9 +21,9 @@ class MMD:
         ry = (yy.diag().unsqueeze(0).expand_as(yy))
 
 
-        dxx = np.transpose(rx) + rx - 2. * xx
-        dyy = np.transpose(ry) + ry - 2. * yy
-        dxy = np.transpose(rx) + ry - 2. * zz
+        dxx = rx + rx.t() - 2. * xx
+        dyy = ry + ry.t() - 2. * yy
+        dxy = rx + ry.t() - 2. * zz
 
         XX, YY, XY = (torch.zeros(xx.shape).to(device),
                       torch.zeros(xx.shape).to(device),
@@ -45,13 +45,17 @@ class MMD:
         computed_mmd =  torch.mean(XX + YY - 2. * XY)
         print(computed_mmd)
         return computed_mmd
+
+       
     
-    def extract_features(self, data_loader, model):
-        features = []
+    def extract_features(self, data, model):
+       # Check if input is grayscale (1 channel), if so, repeat the channels to make it 3 channels
+        if data.size(1) == 1:
+            data = data.repeat(1, 3, 1, 1)  # Repeat the single channel across the 3 channels
+
+        data = data.to(torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu"))
         with torch.no_grad():
-            for images, _ in data_loader:
-                images = images.to(torch.device("cuda" if torch.cuda.is_available() else "cpu"))
-                outputs = model(images)
-                features.append(outputs.cpu())
-        return torch.cat(features, dim=0)
+           features = model(data)
+        return features
+        
         
