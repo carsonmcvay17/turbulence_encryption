@@ -5,6 +5,7 @@ import jax.numpy as jnp
 import jax_cfd.base as cfd
 import jax_cfd.base.grids as grids
 import jax_cfd.spectral as spectral
+import jax_cfd.base.initial_conditions as init
 
 from dataclasses import dataclass
 import turbencrypt.navier_stokes as navier_stokes
@@ -55,12 +56,16 @@ class Turbulence:
         
         # run the simulation
         inner_steps = (self.final_time // dt) // self.outer_steps
+        print(f"{inner_steps=}")
         trajectory_fn = cfd.funcutils.trajectory(
             cfd.funcutils.repeated(step_fn, inner_steps), self.outer_steps
         )
 
         v0 = quiescient(jax.random.PRNGKey(self.random_seed), grid, self.max_velocity, self.peak_wavenum)
+        # v0 = init.filtered_velocity_field(jax.random.PRNGKey(42), grid, self.max_velocity, 4)
         vorticity0 = cfd.finite_differences.curl_2d(v0).data
+
+        #breakpoint()
         vorticity_hat0 = jnp.fft.rfftn(vorticity0)
 
         _, trajectory = trajectory_fn(vorticity_hat0)
@@ -74,10 +79,13 @@ class Turbulence:
 
         transformed_traj = jnp.fft.irfftn(trajectory, axes=(1,2))
         if movie:
-            frames = jnp.linspace(0,25,100).astype(int)
-            for i in frames:
+            for i in jnp.arange(self.outer_steps+1):
                 plt.figure()
-                plt.imshow(transformed_traj[i])
+                if i == 0:
+                    plt.imshow(vorticity0, cmap='seismic')
+                else:
+                    plt.imshow(transformed_traj[i], cmap='seismic')
+                plt.colorbar()
                 filename = "my_fig"+ str(i).zfill(4)+".png"
                 plt.savefig(filename, dpi=300)
                 plt.close()
