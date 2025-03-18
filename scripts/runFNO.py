@@ -14,7 +14,7 @@ from neuralop.training.incremental import IncrementalFNOTrainer
 
 # from Training import Trainer2
 
-data_path = "/Users/gilpinlab/turbulence_encryption/data/mnist_dataset.npz"
+data_path = "/Users/gilpinlab/turbulence_encryption/data/mnist_re700_g64.npz"
 random_state = 42
 test_size = 0.2
 device = 'cpu'
@@ -47,7 +47,7 @@ data_transform = IncrementalDataProcessor(
 )
 
 data_transform = data_transform.to(device)
-num_iters = 10
+num_iters = 80
 optimizer = AdamW(model.parameters(),
                  lr=8e-3, weight_decay=1e-4) 
 scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=num_iters)
@@ -98,6 +98,9 @@ trainer.train(train_loader=train_loader,
 # evaluation
 num_samples = 4
 model.eval()
+input_list = []
+target_list = []
+output_list = []
 with torch.no_grad():
     for batch in test_loader:
         
@@ -113,8 +116,15 @@ with torch.no_grad():
 
         h1losses = h1loss(output, target_data).item()
         lplosses = l2loss(output, target_data).item()
+
+        # store data
+        input_list.append(input_data.cpu().numpy())  # Convert to NumPy arrays on CPU
+        target_list.append(target_data.cpu().numpy())
+        output_list.append(output.cpu().numpy())
         # visualize
         fig, axes = plt.subplots(num_samples, 3, figsize=(12, 10))
+
+
 
         for axes_row, idx in zip(axes, np.random.choice(len(input_data), num_samples, replace=False)):
             for ax, data, label in zip(axes_row, [input_data[idx], target_data[idx], output[idx]], ['Input', 'Target', 'Prediction']):
@@ -126,5 +136,14 @@ with torch.no_grad():
         fig.suptitle(f"batch losses (h1) : {h1losses:.4f} (l2) : {lplosses:.4f}")
         plt.tight_layout()
         plt.show()  
+
+    input_data_array = np.concatenate(input_list, axis = 0)
+    target_data_array = np.concatenate(target_list, axis = 0)
+    output_data_array = np.concatenate(output_list, axis = 0)
+
+    # save as .npz
+    save_path = f"data/mnist_re700_g64_eval.npz"
+    np.savez(save_path, inputs = input_data_array, targets = target_data_array, outputs = output_data_array)
+    print("Data saved")
 
         
