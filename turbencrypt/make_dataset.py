@@ -44,17 +44,15 @@ class Dataset():
         fftmodel = FourierTransform()
         image_paths = glob.glob(f"{image_dir}/*")
         image_iter = (fftmodel.load_image(img_path) for img_path in image_paths)
-        return self.run_sim_from_tensors(image_iter, save_path, config, length=len(image_paths))
+        return self.run_sim_from_tensors(image_iter, save_path, config, length=len(image_paths)) 
 
 
     def run_sim_from_tensors(self, tensors: list[jnp.ndarray], save_path: str, config: dict[str, Any], length: int = None):
         inputs = [] # store simulations at t=15
         outputs = [] #store forcing functions
         metadata = []
-        
         length = length or len(tensors)
         for idx, field in tqdm(enumerate(tensors), desc="Running sims...", total=length):
-
             vorticity_normalized, forcing = self.run_single_sim(field, config)
         
             inputs.append(vorticity_normalized)
