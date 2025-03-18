@@ -120,7 +120,8 @@ def filtered_velocity_field(
   # specified maximum velocity.
   return funcutils.repeated(project_and_normalize, iterations)(velocity)
 
-def quiescient( rng_key: grids.Array,
+def quiescient( 
+    rng_key: grids.Array,
     grid: grids.Grid,
     maximum_velocity: float = 1,
     peak_wavenumber: float = 3,
@@ -153,24 +154,26 @@ def quiescient( rng_key: grids.Array,
   boundary_conditions = []
   for k in keys:
     # Set initial velocity components to zero (quiescent condition)
-    noise = 1e-6 * jax.random.normal(k, grid.shape)
+    # noise = 1e-6 * jax.random.normal(k, grid.shape)
+    noise = 1e-6*jnp.ones(grid.shape)
     velocity_components.append(
         filter_utils.filter(spectral_density, noise, grid))
     boundary_conditions.append(
         boundaries.periodic_boundary_conditions(grid.ndim))
   velocity = wrap_variables(velocity_components, grid, boundary_conditions)
 
-  def project_and_normalize(v: GridVariableVector):
-    v = pressure.projection(v)
-    vmax = _max_speed(v)
-    v = tuple(
-        grids.GridVariable(maximum_velocity * u.array / vmax, u.bc) for u in v)
-    return v
-  # Due to numerical precision issues, we repeatedly normalize and project the
-  # velocity field. This ensures that it is divergence-free and achieves the
-  # specified maximum velocity.
-  return funcutils.repeated(project_and_normalize, iterations)(velocity)
-
+  # def project_and_normalize(v: GridVariableVector):
+  #   v = pressure.projection(v)
+  #   vmax = _max_speed(v)
+  #   v = tuple(
+  #       grids.GridVariable(maximum_velocity * u.array / vmax, u.bc) for u in v)
+  #   return v
+  # # Due to numerical precision issues, we repeatedly normalize and project the
+  # # velocity field. This ensures that it is divergence-free and achieves the
+  # # specified maximum velocity.
+  # # breakpoint()
+  # return funcutils.repeated(project_and_normalize, iterations)(velocity)
+  return velocity
 
 
 def initial_velocity_field(
